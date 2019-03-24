@@ -10,60 +10,63 @@ from email.mime.application import MIMEApplication
 import datetime
 import os.path  
 import mimetypes
-from email.MIMEBase import MIMEBase
-from email import Encoders 
+# python2.x
+# from email.MIMEBase import MIMEBase
+from email.mime.base import MIMEBase
+# from email.encode import Encoders 
 
 import pickle
 from openpyxl import Workbook
 from openpyxl import load_workbook
-from openpyxl.compat import range
+# from openpyxl.compat import range
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import ExcelWriter 
-reload(sys)
-sys.setdefaultencoding('utf8')
+from email.header import Header  
+import smtplib    
+
 
 def send_mail(config):
-    print 'Sending Mail...'
+    print("Sending Mail...")
+    smtpserver = 'smtp.163.com'
+    username = '13407178083@163.com'
+    password='20090607h'
+    sender='13407178083@163.com'
+    #receiver='XXX@126.com'
+    #收件人为多个收件人
+    subject = 'this is excel email'
+    receiver=['13407178083@163.com']
+    msg = MIMEMultipart('mixed') 
+    msg['Subject'] = Header(subject, 'utf-8')
+    msg['From'] = '13407178083@163.com'
+    msg['To'] = '13407178083@163.com'
+    text = config['text']
+    msg.attach(text)
+    # 登录并发送邮件
+    try:
+        smtp = smtplib.SMTP()
+        smtp.connect(smtpserver)
+        smtp.login(username, password)
+        smtp.sendmail(sender, receiver, msg.as_string())
+    except:
+        print("邮件发送失败！")
+    else:
+        print("邮件发送成功！")
+    finally:
+        smtp.quit()
 
-    message = MIMEMultipart()
-    message["Accept-Charset"] = "ISO-8859-1,utf-8"
-    message['From'] = 'pingyang.wang@mail.cn'
-    
-    message['To'] =','.join(config['to'])
-    message['CC'] = ','.join(config['cc'])
-    message['Subject'] = config['subject']
-    message['Date'] = time.ctime(time.time())
-    message['Reply-To'] = 'pingyang.wang@mail.cn'
-    message['X-Priority'] = '3'
-    message['X-MSMail-Priority'] = 'Normal'
-    if config['text']:
-        text = config['text']
-        message.attach(text)
 
-    part = MIMEApplication(open(fileName,'rb').read())  
-    part.add_header('Content-Disposition', 'attachment', filename=fileName)  
-    message.attach(part)
 
-    smtp = SMTP(config['server'], config['port'])
 
-    username = 'pingyang.wang@mail.cn'
-    smtp.login(username, 'xxxxxx')
-
-    smtp.sendmail(username, config['to'], message.as_string())
-    print 'Send Mail OK'
-
-    smtp.close()
-    time.sleep(1)
 
 def send_mail_to_test(context):
     send_mail({
-        'to': ["wangpingyang03@mail.cn"],
-        'cc': ['wangpingyang03@mail.cn'],
-        'server': 'smtp.exmail.qq.com',
+        'to': ["13407178083@163.com"],
+        'cc': ['13407178083@163.com'],
+        'server': 'smtp.163.com',
         'port': 25,
         'subject': 'Just for Test',
-        'username': 'pingyang.wang@mail.cn',
-        'password': 'xxxxxx',
+        'username': '13407178083@163.com',
+        'password': '20090607h',
         'text': context}
     )
 
@@ -80,8 +83,8 @@ def message_from_excel():
 
     bugly_flu = []
 
-    for rown in xrange(3,7):
-        for coln in xrange(2,8):
+    for rown in range(3,7):
+        for coln in range(2,8):
             value = ws.cell(row=rown,column=coln).value
             if coln == 2:
                 all_versions.append(value)
@@ -95,7 +98,7 @@ def message_from_excel():
                 yes_bugly.append(float(value))
             
 
-    for x in xrange(0,4):  
+    for x in range(0,4):  
         bugly_flu.append(crash_rate(today_bugly[x],yes_bugly[x]))
 
     html = """\
@@ -171,8 +174,8 @@ def daily_crash_bugly(num):
     temp = "%.2f" %(num * 100) + '%'
     return temp
 
-fileName = '/Users/wangpingyang/Downloads/Bugly-Daily-iOS.xlsx'
-print fileName
+fileName = "E:/python_prj/python_email/auto_email/Small_Python/Bugly-Daily-iOS.xlsx"
+print(fileName)
 
 if __name__ == '__main__':
     message_from_excel()
