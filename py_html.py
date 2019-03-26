@@ -29,7 +29,7 @@ def send_mail(config):
     print("Sending Mail...")
     smtpserver = 'smtp.163.com'
     username = '13407178083@163.com'
-    password='20090607h'
+    password='xxxxxx'
     sender='13407178083@163.com'
     #receiver='XXX@126.com'
     #收件人为多个收件人
